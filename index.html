@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FB Link Captioner</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<style>
+  :root{
+    color-scheme:dark;
+    --bg:#07111f;
+    --panel:#0b1a2b;
+    --line:#1c3855;
+    --text:#e9f3ff;
+    --muted:#9db4ce;
+    --blue:#2788ff;
+    --purple:#874bff;
+    --green:#24d6a0;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:radial-gradient(ellipse at top,#102544 0,#07111f 58%);
+    color:var(--text);
+    font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  }
+  .top{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px clamp(16px,4vw,44px);
+    border-bottom:1px solid var(--line);gap:16px;
+  }
+  .brand{font-size:20px;font-weight:800}
+  .brand span{color:#56b5ff}
+  .pill{
+    border:1px solid #4654c9;border-radius:999px;
+    padding:6px 12px;color:#c7d5ff;font-size:12px;
+  }
+  main{max-width:1280px;margin:auto;padding:28px 18px 40px}
+  .hero{text-align:center;margin:8px 0 28px}
+  .hero h1{
+    font-size:clamp(27px,4vw,44px);line-height:1.15;margin:0 0 10px;
+    background:linear-gradient(90deg,#38bdf8,#6875ff,#bc63ff);
+    color:transparent;background-clip:text;
+  }
+  .hero p{margin:5px;color:var(--muted)}
+  .layout{
+    display:grid;
+    grid-template-columns:minmax(0,0.9fr) minmax(0,1.1fr);
+    gap:18px;
+  }
+  .panel{
+    background:linear-gradient(145deg,rgba(12,29,48,.97),rgba(7,20,34,.98));
+    border:1px solid var(--line);border-radius:16px;
+    padding:20px;min-width:0;
+  }
+  .section-title{font-size:17px;font-weight:750;margin:0 0 6px}
+  .help{font-size:13px;color:var(--muted);margin:0 0 12px}
+  textarea{
+    width:100%;resize:vertical;min-height:155px;
+    background:#061323;color:var(--text);
+    border:1px solid #25496e;border-radius:11px;padding:13px;
+    font:13px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;
+    outline:none;
+  }
+  textarea:focus,input:focus{
+    border-color:#438dff;box-shadow:0 0 0 2px #2788ff20;
+  }
+  .caption{min-height:140px}
+  .divider{height:1px;background:var(--line);margin:19px 0}
+  .checkrow{
+    display:flex;align-items:center;gap:9px;
+    color:#c6d7eb;font-size:14px;margin:8px 0;
+  }
+  .checkrow input{accent-color:#458aff;width:16px;height:16px}
+  .btn{
+    border:0;border-radius:10px;padding:11px 15px;
+    font-weight:750;cursor:pointer;color:white;
+    background:linear-gradient(100deg,var(--blue),var(--purple));
+    transition:filter .15s,transform .15s;
+  }
+  .btn:hover{filter:brightness(1.1)}
+  .btn:active{transform:scale(.99)}
+  .btn.secondary{
+    background:#122b44;border:1px solid #294968;color:#d8e8ff;
+  }
+  .btn.small{padding:7px 10px;font-size:12px}
+  .actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}
+  .full{width:100%;margin-top:13px;padding:14px}
+  .results-head{
+    display:flex;justify-content:space-between;align-items:center;
+    gap:10px;margin-bottom:13px;
+  }
+  .count{
+    font-size:12px;color:#5af0bd;
+    border:1px solid #176d5b;background:#062d2a;
+    padding:4px 9px;border-radius:999px;white-space:nowrap;
+  }
+  .result-list{display:grid;gap:9px}
+  .item{
+    display:grid;grid-template-columns:34px minmax(0,1fr) auto;
+    gap:11px;align-items:start;padding:12px;
+    background:#0b1b2b;border:1px solid #1b3852;border-radius:12px;
+  }
+  .num{
+    width:32px;height:32px;display:grid;place-items:center;
+    border-radius:50%;font-weight:800;
+    background:linear-gradient(145deg,#267cff,#9251ff);
+  }
+  .output{
+    white-space:pre-wrap;overflow-wrap:anywhere;
+    font-size:13px;line-height:1.55;
+  }
+  .empty{
+    padding:30px 15px;text-align:center;color:var(--muted);
+    border:1px dashed #294762;border-radius:12px;
+  }
+  .status{font-size:12px;color:var(--green);margin-top:8px;min-height:18px}
+  footer{text-align:center;color:#829bb8;font-size:12px;padding:22px}
+
+  @media(max-width:850px){
+    .layout{grid-template-columns:1fr}
+    .panel{padding:16px}
+    .top{padding:15px}
+    .item{grid-template-columns:30px minmax(0,1fr)}
+    .item .copy-one{grid-column:2;justify-self:start}
+    .num{width:29px;height:29px}
+  }
+  @media(max-width:420px){
+    .brand{font-size:17px}
+    .pill{font-size:10px;padding:5px 8px}
+    .hero{margin-bottom:20px}
+    .actions .btn{flex:1}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">🔗 FB <span>Link Captioner</span></div>
+  <div class="pill">🔥 Creator Tamim 🔥</div>
+</header>
+
+<main>
+  
+
+  <div class="layout">
+
+    <!-- LEFT PANEL -->
+    <section class="panel">
+      <h2 class="section-title">🔗 Your links</h2>
+      <p class="help">Paste URLs here, one per line.</p>
+      <textarea id="links" placeholder="https://example.com/xxxx"></textarea>
+      <div class="status" id="linkStatus" aria-live="polite"></div>
+
+      <div class="divider"></div>
+
+      <h2 class="section-title">📝 Caption template</h2>
+      <p class="help">Use <code>{{URL}}</code> where each link should appear.</p>
+      <textarea id="template" class="caption">✅ Full Video 👉 {{URL}} 🚨 Viral Update! Fortuner, Scorpio repossessed by the bank, cheapest🔥 😱👀 #BankAuction #Fortuner #Scorpio #Auction #ViralVideo #Trending</textarea>
+
+      <div class="divider"></div>
+
+      <h2 class="section-title">⚙️ Options</h2>
+      <label class="checkrow">
+        <input type="checkbox" id="numbering"> Add numbering (1., 2., 3....)
+      </label>
+      <label class="checkrow">
+        <input type="checkbox" id="separators" checked> Add a blank line between captions when copying all
+      </label>
+
+      <div class="actions">
+        <button class="btn secondary" id="clear">Clear all</button>
+        <button class="btn secondary" id="sample">Load sample links</button>
+      </div>
+
+      <button class="btn full" id="generate">Generate descriptions</button>
+      <div class="status" id="mainStatus" aria-live="polite"></div>
+    </section>
+
+    <!-- RIGHT PANEL -->
+    <section class="panel">
+      <div class="results-head">
+        <h2 class="section-title">📋 Generated descriptions</h2>
+        <span class="count" id="count">0 ready</span>
+      </div>
+
+      <div class="actions" style="margin:0 0 13px">
+        <button class="btn" id="copyAll">Copy all</button>
+        <button class="btn secondary" id="download">Download .txt</button>
+      </div>
+
+      <div id="results" class="result-list">
+        <div class="empty">Generated captions will appear here</div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<script>
+(() => {
+  "use strict";
+
+  // ---------- Element shortcuts ----------
+  const $ = (id) => document.getElementById(id);
+  const els = {
+    links:      $("links"),
+    template:   $("template"),
+    numbering:  $("numbering"),
+    separators: $("separators"),
+    linkStatus: $("linkStatus"),
+    mainStatus: $("mainStatus"),
+    count:      $("count"),
+    results:    $("results"),
+    generate:   $("generate"),
+    copyAll:    $("copyAll"),
+    download:   $("download"),
+    clear:      $("clear"),
+    sample:     $("sample"),
+  };
+
+  // ---------- State ----------
+  let descriptions = [];
+
+  // ---------- Helpers ----------
+  const URL_PATTERN = /^https?:\/\//i;
+
+  /** Extract valid http(s) URLs from the links textarea. */
+  function getLinks() {
+    return els.links.value
+      .split(/[\n\r\t ,]+/)
+      .map((s) => s.trim())
+      .filter((s) => URL_PATTERN.test(s));
+  }
+
+  /** Set the main status message. */
+  const setStatus = (msg) => { els.mainStatus.textContent = msg; };
+
+  /** Copy text to clipboard with a fallback for older browsers. */
+  async function copyText(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      fallbackCopy(text);
+      return false;
+    }
+  }
+
+  function fallbackCopy(text) {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.append(ta);
+    ta.select();
+    document.execCommand("copy");
+    ta.remove();
+  }
+
+  /** Temporarily change a button's label (e.g. "Copied ✓"). */
+  function flashButton(btn, text, duration = 1300) {
+    const original = btn.textContent;
+    btn.textContent = text;
+    setTimeout(() => { btn.textContent = original; }, duration);
+  }
+
+  // ---------- Rendering ----------
+  function render() {
+    const root = els.results;
+    root.replaceChildren();
+
+    const n = descriptions.length;
+    els.count.textContent = `${n} ${n === 1 ? "description" : "descriptions"} ready`;
+
+    if (n === 0) {
+      const empty = document.createElement("div");
+      empty.className = "empty";
+      empty.textContent = "No captions yet. Paste links and select Generate descriptions.";
+      root.append(empty);
+      return;
+    }
+
+    const fragment = document.createDocumentFragment();
+
+    descriptions.forEach((text, i) => {
+      const item = document.createElement("article");
+      item.className = "item";
+
+      const num = document.createElement("div");
+      num.className = "num";
+      num.textContent = i + 1;
+
+      const body = document.createElement("div");
+      body.className = "output";
+      body.textContent = text;
+
+      const btn = document.createElement("button");
+      btn.className = "btn small copy-one";
+      btn.textContent = "Copy";
+      btn.addEventListener("click", async () => {
+        await copyText(text);
+        flashButton(btn, "Copied ✓");
+      });
+
+      item.append(num, body, btn);
+      fragment.append(item);
+    });
+
+    root.append(fragment);
+  }
+
+  // ---------- Actions ----------
+  function generateDescriptions() {
+    const links = getLinks();
+    const template = els.template.value;
+
+    if (links.length === 0) {
+      setStatus("Paste at least one valid URL starting with http:// or https://.");
+      return;
+    }
+    if (!template.includes("{{URL}}")) {
+      setStatus("Add {{URL}} to the caption template where the link should go.");
+      return;
+    }
+
+    const numbered = els.numbering.checked;
+    descriptions = links.map((url, i) =>
+      `${numbered ? `${i + 1}. ` : ""}${template.replaceAll("{{URL}}", url)}`
+    );
+
+    render();
+    setStatus(`Done! Generated ${descriptions.length} description(s).`);
+  }
+
+  async function copyAll() {
+    if (descriptions.length === 0) {
+      setStatus("Generate descriptions first.");
+      return;
+    }
+    const joiner = els.separators.checked ? "\n\n" : "\n";
+    const ok = await copyText(descriptions.join(joiner));
+    setStatus(ok
+      ? "All descriptions copied to clipboard."
+      : "Copy attempted. If needed, select the generated text and copy manually."
+    );
+  }
+
+  function downloadTxt() {
+    if (descriptions.length === 0) {
+      setStatus("Generate descriptions first.");
+      return;
+    }
+    const blob = new Blob([descriptions.join("\n\n")], {
+      type: "text/plain;charset=utf-8",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "facebook-descriptions.txt";
+    a.click();
+    URL.revokeObjectURL(url);
+    setStatus("Text file downloaded.");
+  }
+
+  function clearAll() {
+    els.links.value = "";
+    descriptions = [];
+    els.linkStatus.textContent = "";
+    render();
+    setStatus("Cleared.");
+  }
+
+  function loadSample() {
+    els.links.value =
+      "https://example.com/video-1\n" +
+      "https://example.com/video-2\n" +
+      "https://example.com/video-3";
+    els.linkStatus.textContent = "3 valid URL(s) detected";
+    setStatus("Sample links loaded. Replace them with your own URLs.");
+  }
+
+  // ---------- Event wiring ----------
+  els.links.addEventListener("input", () => {
+    els.linkStatus.textContent = `${getLinks().length} valid URL(s) detected`;
+  });
+
+  els.generate.addEventListener("click", generateDescriptions);
+  els.copyAll.addEventListener("click", copyAll);
+  els.download.addEventListener("click", downloadTxt);
+  els.clear.addEventListener("click", clearAll);
+  els.sample.addEventListener("click", loadSample);
+})();
+</script>
+
+</body>
+</html>
